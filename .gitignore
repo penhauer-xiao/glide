@@ -6,3 +6,5 @@ glide.exe
 dist/
 .DS_Store
 .idea
+.git
+vendor
