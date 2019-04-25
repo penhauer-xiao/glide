@@ -32,6 +32,34 @@ func Create(base string, skipImport, nonInteractive bool) {
 
 	// Guess deps
 	conf := guessDeps(base, skipImport)
+
+	// kent
+	for _, dep := range conf.Imports {
+		if repo, _ := util.KGWF(dep.Name); repo != dep.Name {
+			dep.Repository = repo
+		}
+	}
+
+	for _, dep := range conf.DevImports {
+		if repo, _ := util.KGWF(dep.Name); repo != dep.Name {
+			dep.Repository = repo
+		}
+	}
+
+	for _, v := range conf.Imports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	for _, v := range conf.DevImports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
 	// Write YAML
 	msg.Info("Writing configuration file (%s)", glidefile)
 	if err := conf.WriteFile(glidefile); err != nil {

@@ -3,12 +3,15 @@ package action
 import (
 	"io/ioutil"
 	"path/filepath"
+	"sync"
 
 	"github.com/Masterminds/glide/cache"
 	"github.com/Masterminds/glide/cfg"
 	"github.com/Masterminds/glide/msg"
 	gpath "github.com/Masterminds/glide/path"
 	"github.com/Masterminds/glide/repo"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Update updates repos and the lock file from the main glide yaml.
@@ -51,9 +54,70 @@ func Update(installer *repo.Installer, skipRecursive, stripVendor bool) {
 		}
 	}
 
+	// kent
+	var importsMap sync.Map
+	for i, v := range confcopy.Imports {
+		if idx, ok := importsMap.Load(v.Name); !ok {
+			importsMap.Store(v.Name, i)
+		} else {
+			confcopy.Imports[idx.(int)].Subpackages = append(confcopy.Imports[idx.(int)].Subpackages, v.Subpackages...)
+			if v.Reference != "" {
+				logrus.Infoln(">>>>:",v.Name,v.Reference)
+				confcopy.Imports[idx.(int)].Reference = v.Reference
+			}
+			v.VcsType = "d"
+		}
+	}
+
+	for i := len(confcopy.Imports) - 1; i >= 0; i-- {
+		if confcopy.Imports[i].VcsType == "d" {
+			copy(confcopy.Imports[i:], confcopy.Imports[i+1:])
+			confcopy.Imports[len(confcopy.Imports)-1] = nil
+			confcopy.Imports = confcopy.Imports[:len(confcopy.Imports)-1]
+		}
+	}
+
+	var importsDevMap sync.Map
+	for i, v := range confcopy.DevImports {
+		if idx, ok := importsDevMap.Load(v.Name); !ok {
+			importsDevMap.Store(v.Name, i)
+		} else {
+			confcopy.DevImports[idx.(int)].Subpackages = append(confcopy.DevImports[idx.(int)].Subpackages, v.Subpackages...)
+			if v.Reference != "" {
+				confcopy.DevImports[idx.(int)].Reference = v.Reference
+			}
+			v.Name = "d"
+		}
+	}
+
+	for i := len(confcopy.DevImports) - 1; i >= 0; i-- {
+		if confcopy.DevImports[i].VcsType == "d" {
+			copy(confcopy.DevImports[i:], confcopy.DevImports[i+1:])
+			confcopy.DevImports[len(confcopy.DevImports)-1] = nil
+			confcopy.DevImports = confcopy.DevImports[:len(confcopy.DevImports)-1]
+		}
+	}
+
 	err := installer.Export(confcopy)
 	if err != nil {
 		msg.Die("Unable to export dependencies to vendor directory: %s", err)
+	}
+
+	for _, v := range confcopy.Imports {
+		for _, v1 := range confcopy.DevImports {
+			if v.Name == v1.Name {
+				if v.Pin == v1.Pin {
+					if v.Reference == "" && v1.Reference!="" {
+						v.Reference = v1.Reference
+					}
+
+					if v1.Reference == "" && v.Reference!="" {
+						v1.Reference = v.Reference
+					}
+				}
+				break
+			}
+		}
 	}
 
 	// Write glide.yaml (Why? Godeps/GPM/GB?)

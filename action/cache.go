@@ -11,7 +11,15 @@ import (
 func CacheClear() {
 	l := cache.Location()
 
-	err := os.RemoveAll(l)
+	var err error
+	for i := 0; i < 20; i++ {
+		err = os.RemoveAll(l)
+		if err != nil {
+			msg.Warn("Unable to clear the cache: %d: %s", i, err)
+			continue
+		}
+		break
+	}
 	if err != nil {
 		msg.Die("Unable to clear the cache: %s", err)
 	}

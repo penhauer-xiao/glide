@@ -21,6 +21,8 @@ package main
 import (
 	"path/filepath"
 
+	_ "github.com/sirupsen/logrus"
+
 	"github.com/Masterminds/glide/action"
 	"github.com/Masterminds/glide/cache"
 	"github.com/Masterminds/glide/msg"

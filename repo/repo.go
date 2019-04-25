@@ -4,8 +4,12 @@
 // systems of each repository upon which the code relies.
 package repo
 
+import (
+	"github.com/spf13/viper"
+)
+
 // concurrentWorkers is the number of workers to be used in concurrent operations.
-var concurrentWorkers = 20
+var concurrentWorkers = viper.GetInt("log.go")
 
 // UpdatingVendored indicates whether this run of Glide is updating a vendored vendor/ path.
 //

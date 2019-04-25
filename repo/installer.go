@@ -93,7 +93,22 @@ func (i *Installer) Install(lock *cfg.Lockfile, conf *cfg.Config) (*cfg.Config, 
 		return newConf, nil
 	}
 
-	msg.Info("Downloading dependencies. Please wait...")
+	// kent
+	for _, v := range newConf.Imports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	for _, v := range newConf.DevImports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	msg.Info("[1] Downloading dependencies. Please wait...")
 
 	err := LazyConcurrentUpdate(newConf.Imports, i, newConf)
 	if err != nil {
@@ -110,7 +125,22 @@ func (i *Installer) Install(lock *cfg.Lockfile, conf *cfg.Config) (*cfg.Config, 
 // vendor directory based on changed config.
 func (i *Installer) Checkout(conf *cfg.Config) error {
 
-	msg.Info("Downloading dependencies. Please wait...")
+	// kent
+	for _, v := range conf.Imports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	for _, v := range conf.DevImports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	msg.Info("[2] Downloading dependencies. Please wait...")
 
 	if err := ConcurrentUpdate(conf.Imports, i, conf); err != nil {
 		return err
@@ -160,7 +190,7 @@ func (i *Installer) Update(conf *cfg.Config) error {
 	res.Handler = m
 	res.VersionHandler = v
 	res.ResolveAllFiles = i.ResolveAllFiles
-	msg.Info("Resolving imports")
+	msg.Info("Resolving imports from Update")
 
 	imps, timps, err := res.ResolveLocal(false)
 	if err != nil {
@@ -214,6 +244,17 @@ func (i *Installer) Update(conf *cfg.Config) error {
 		}
 	}
 
+	// kent
+	for _, dep := range deps {
+		if repo, _ := util.KGWF(dep.Name); repo != dep.Name {
+			dep.Repository = repo
+		}
+		if name, subPackage := util.GetSubpackages(dep.Name); name != "" {
+			dep.Name = name
+			dep.Subpackages = append(dep.Subpackages, subPackage)
+		}
+	}
+
 	_, err = allPackages(deps, res, false)
 	if err != nil {
 		msg.Die("Failed to retrieve a list of dependencies: %s", err)
@@ -227,7 +268,22 @@ func (i *Installer) Update(conf *cfg.Config) error {
 		}
 	}
 
-	msg.Info("Downloading dependencies. Please wait...")
+	// kent
+	for _, v := range conf.Imports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	for _, v := range conf.DevImports {
+		if name, subPackage := util.GetSubpackages(v.Name); name != "" {
+			v.Name = name
+			v.Subpackages = append(v.Subpackages, subPackage)
+		}
+	}
+
+	msg.Info("[3] Downloading dependencies. Please wait...")
 
 	err = ConcurrentUpdate(conf.Imports, i, conf)
 	if err != nil {
@@ -672,12 +728,18 @@ func (m *MissingPackageHandler) fetchToCache(pkg string, addTest bool) error {
 		d = m.Config.DevImports.Get(root)
 	}
 
+
 	// If the dependency is nil it means the Config doesn't yet know about it.
 	if d == nil {
 		d, _ = m.Use.Get(root)
 		// We don't know about this dependency so we create a basic instance.
 		if d == nil {
 			d = &cfg.Dependency{Name: root}
+		}
+
+		// kent
+		if repo, _ := util.KGWF(d.Name); repo != d.Name {
+			d.Repository = repo
 		}
 
 		if addTest {

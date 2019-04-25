@@ -507,11 +507,23 @@ func (d *Dependency) GetRepo(dest string) (vcs.Repo, error) {
 
 	VcsType := d.Vcs()
 
+	// kent
+	var repo vcs.Repo
+	var err error
+	_, branch := util.KGWF(d.Name)
+
 	// If the VCS type has a value we try that first.
 	if len(VcsType) > 0 && VcsType != "None" {
 		switch vcs.Type(VcsType) {
 		case vcs.Git:
-			return vcs.NewGitRepo(remote, dest)
+			// kent
+			if repo, err = vcs.NewGitRepo(remote, dest); err == nil {
+				repo.SetPkg(d.Name)
+				if branch != "" {
+					repo.SetCloneBranch(branch)
+				}
+			}
+			return repo, err
 		case vcs.Svn:
 			return vcs.NewSvnRepo(remote, dest)
 		case vcs.Hg:
@@ -524,7 +536,14 @@ func (d *Dependency) GetRepo(dest string) (vcs.Repo, error) {
 	}
 
 	// When no type set we try to autodetect.
-	return vcs.NewRepo(remote, dest)
+	// kent
+	if repo, err = vcs.NewGitRepo(remote, dest); err == nil {
+		repo.SetPkg(d.Name)
+		if branch != "" {
+			repo.SetCloneBranch(branch)
+		}
+	}
+	return repo, err
 }
 
 // Clone creates a clone of a Dependency

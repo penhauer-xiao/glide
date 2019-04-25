@@ -62,7 +62,17 @@ func CustomRemoveAll(p string) error {
 		}
 		return nil
 	}
-	return os.RemoveAll(p)
+
+	var err error
+	for i := 0; i < 20; i++ {
+		err = os.RemoveAll(p)
+		if err != nil {
+			msg.Warn("Unable to clear the cache: %d: %s", i, err)
+			continue
+		}
+		break
+	}
+	return err
 }
 
 // CustomRename is similar to os.Rename but deals with the bug outlined

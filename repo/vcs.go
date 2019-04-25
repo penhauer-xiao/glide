@@ -16,8 +16,10 @@ import (
 	"github.com/Masterminds/glide/cfg"
 	"github.com/Masterminds/glide/msg"
 	gpath "github.com/Masterminds/glide/path"
+	"github.com/Masterminds/glide/util"
 	"github.com/Masterminds/semver"
 	v "github.com/Masterminds/vcs"
+	"github.com/sirupsen/logrus"
 )
 
 // VcsUpdate updates to a particular checkout based on the VCS setting.
@@ -272,6 +274,25 @@ func VcsGet(dep *cfg.Dependency) error {
 			return err
 		}
 		branch := findCurrentBranch(repo)
+
+		// kent
+		if dep.Reference == "" {
+			remote := dep.Remote()
+			if tags, err1 := repo.Tags(); err1 == nil {
+				for _, tag := range tags {
+					cp.MemPut(remote, tag)
+				}
+			}
+			LatestVersion := cp.MemLatest(remote)
+			if LatestVersion != "" {
+				dep.Reference = "~" + LatestVersion
+				logrus.Infof("The latest version of %s is: %s", remote, dep.Reference)
+			}
+		}
+		if _, newBranch := util.KGWF(dep.Name); newBranch != "" && branch != newBranch {
+			branch = newBranch
+		}
+
 		if branch != "" {
 			msg.Debug("Saving default branch for %s", repo.Remote())
 			c := cp.RepoInfo{DefaultBranch: branch}

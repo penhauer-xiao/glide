@@ -1,0 +1,74 @@
+hash: 7426fff6bf4b691f636556113aa35a5c2cea1bdec6e8c137bcbf52438e6bbd64
+updated: 2019-04-26T00:55:52.27535399+08:00
+imports:
+- name: github.com/codegangsta/cli
+  version: cfb38830724cc34fedffe9a2a29fb54fa9169cd1
+- name: github.com/fsnotify/fsnotify
+  version: c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9
+- name: github.com/hashicorp/hcl
+  version: 8cb6e5b959231cc1119e43259c4a608f9c51a241
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/printer
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
+- name: github.com/kr/pretty
+  version: 73f6ac0b30a98e433b289500d779f50c1a6f0712
+- name: github.com/kr/text
+  version: e2ffdb16a802fe2bb95e2e35ff34f0e53aeef34f
+- name: github.com/magiconair/properties
+  version: c2353362d570a7bfa228149c62842019201cfb71
+- name: github.com/Masterminds/semver
+  version: c7af12943936e8c39859482e61f0574c2fd7fc75
+- name: github.com/Masterminds/vcs
+  version: 61b20afe0c90f57b01588fa0439aebffdcfec96a
+  repo: https://github.com/spiderorg/vcs
+- name: github.com/mitchellh/go-homedir
+  version: af06845cf3004701891bf4fdb884bfe4920b3727
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/pelletier/go-toml
+  version: 63909f0a90ab0f36909e8e044e46ace10cf13ba2
+- name: github.com/sirupsen/logrus
+  version: fb59e36e88fd2bb811db4b48e49ad339552a45af
+  repo: https://github.com/spiderorg/logrus
+- name: github.com/spf13/afero
+  version: 588a75ec4f32903aa5e39a2619ba6a4631e28424
+  subpackages:
+  - mem
+- name: github.com/spf13/cast
+  version: 8c9545af88b134710ab1cd196795e7f2388358d7
+- name: github.com/spf13/jwalterweatherman
+  version: 94f6ae3ed3bceceafa716478c5fbf8d29ca601a1
+- name: github.com/spf13/pflag
+  version: 298182f68c66c05229eb03ac171abe6e309ee79a
+- name: github.com/spf13/viper
+  version: 9e56dacc08fbbf8c9ee2dbc717553c758ce42bc9
+- name: golang.org/x/crypto
+  version: c05e17bb3b2dca130fc919668a96b4bec9eb9442
+  repo: https://github.com/golang/crypto
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 9f0b1ff7b46a4014ddb5d4bdb6602a43b882cb27
+  repo: https://github.com/golang/sys
+  subpackages:
+  - unix
+- name: golang.org/x/text
+  version: c942b20a5d85b458c4dce1589326051d85e25d6d
+  repo: https://github.com/golang/text
+  subpackages:
+  - transform
+  - unicode/norm
+- name: gopkg.in/natefinch/lumberjack.v2
+  version: a96e63847dc3c67d17befa69c303767e2f84e54f
+  repo: https://github.com/natefinch/lumberjack
+- name: gopkg.in/yaml.v2
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232
+  repo: https://github.com/go-yaml/yaml
+testImports: []

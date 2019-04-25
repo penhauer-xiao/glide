@@ -11,6 +11,7 @@ import (
 	"github.com/Masterminds/glide/cfg"
 	"github.com/Masterminds/glide/msg"
 	gpath "github.com/Masterminds/glide/path"
+	"github.com/Masterminds/glide/util"
 	"github.com/Masterminds/semver"
 	"github.com/Masterminds/vcs"
 )
@@ -37,6 +38,11 @@ func ConfigWizard(base string) {
 	}
 
 	conf := EnsureConfig()
+	for _, dep := range conf.Imports {
+		if repo, _ := util.KGWF(dep.Name); repo != dep.Name {
+			dep.Repository = repo
+		}
+	}
 
 	cache.Setup()
 
@@ -210,7 +216,6 @@ func wizardAskRange(ver *semver.Version, d *cfg.Dependency) string {
 	msg.Info(" - Skip using ranges\n")
 	msg.Info("For more information on Glide versions and ranges see https://glide.sh/docs/versions")
 	msg.Info("Minor (M), Patch (P), or Skip Ranges (S)?")
-
 	res, err := msg.PromptUntil([]string{"minor", "m", "patch", "p", "skip ranges", "s"})
 	if err != nil {
 		msg.Die("Error processing response: %s", err)
@@ -263,11 +268,16 @@ func wizardFindVersions(d *cfg.Dependency) {
 	}
 
 	local := filepath.Join(l, "src", key)
+
+	// kent
+	_, branch := util.KGWF(d.Name)
 	repo, err := vcs.NewRepo(remote, local)
 	if err != nil {
 		msg.Debug("Problem getting repo instance: %s", err)
 		return
 	}
+	repo.SetPkg(d.Name)
+	repo.SetCloneBranch(branch)
 
 	var useLocal bool
 	if _, err = os.Stat(local); err == nil {
